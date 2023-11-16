@@ -1,0 +1,117 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        #chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #messages {
+            padding: 20px;
+            overflow-y: scroll;
+            max-height: 300px;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 10px;
+        }
+
+        #input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        #send-button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="input" placeholder="Type your message">
+            <button id="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function makeRequestOptions(sendData) {
+            var requestOptions = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(sendData),
+            };
+
+            return requestOptions;
+        }
+
+        const messagesDiv = document.getElementById("messages");
+        const input = document.getElementById("input");
+
+        function sendMessage() {
+            const message = input.value.trim();
+            if (message !== "") {
+                appendMessage(`You: ${message}`, true);
+                input.value = "";
+
+                var sendData = {
+                    prompt: message
+                }
+
+                fetch("/send", makeRequestOptions(sendData)).then((response) => {
+                    response.json().then((recvData) => {
+                        appendMessage(`GPT : ${recvData["message"]}`, false)
+                    })
+                }).catch((error) => {
+                    console.error("Error:", error);
+                });
+            }
+        }
+
+        function appendMessage(message, isUser) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = isUser ? "user-message" : "other-message";
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Simulate receiving messages
+        setTimeout(() => {
+            appendMessage("Hello!, Welcome to our GPT-Server", false);
+        }, 1000);
+    </script>
+</body>
+
+</html>

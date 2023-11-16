@@ -1,0 +1,46 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// RequestBody is a struct to represent the data expected in the POST request body
+type RequestBody struct {
+	Message string `json:"message"`
+}
+
+func main() {
+	// Define a handler function for the API endpoint
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		// Check if the request method is POST
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Decode the JSON request body into the RequestBody struct
+		var requestBody RequestBody
+		err := json.NewDecoder(r.Body).Decode(&requestBody)
+		if err != nil {
+			http.Error(w, "Error decoding request body", http.StatusBadRequest)
+			return
+		}
+
+		// Do something with the received data (here, just print it)
+		fmt.Printf("Received message: %s\n", requestBody.Message)
+
+		// Send a response
+		response := map[string]string{"status": "success", "message": "Message received"}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+
+	// Register the API handler function for the "/api" endpoint
+	http.HandleFunc("/api", apiHandler)
+
+	// Start the HTTP server on port 8080
+	fmt.Println("API server is running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
