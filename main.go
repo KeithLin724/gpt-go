@@ -61,11 +61,23 @@ type RequestBody struct {
 	Prompt string `json:"prompt"`
 }
 
+func SendMessage(w http.ResponseWriter, r *http.Request, state, message string) {
+	// TODO: send the error message
+	response := map[string]string{
+		"status":  "fail",
+		"message": message,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 // for the use send to the lab server
 func SendApi(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		http.ServeFile(w, r, "./error.html")
+
+		// TODO: send the error message
+		SendMessage(w, r, "fail", "Method not allowed")
 		return
 	}
 
@@ -73,7 +85,7 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(err)
-		http.ServeFile(w, r, "./error.html")
+		SendMessage(w, r, "fail", err.Error())
 		return
 	}
 
@@ -84,7 +96,9 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		http.Error(w, "Error decoding request body", http.StatusBadRequest)
-		http.ServeFile(w, r, "./error.html")
+
+		// TODO: send the error message
+		SendMessage(w, r, "fail", err.Error())
 		return
 	}
 
@@ -103,7 +117,7 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Error reading the response:", err)
-		http.ServeFile(w, r, "./error.html")
+		SendMessage(w, r, "fail", err.Error())
 		return
 	}
 	//TODO:decode the request
@@ -113,19 +127,20 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Error reading the response:", err)
-		http.ServeFile(w, r, "./error.html")
+		SendMessage(w, r, "fail", err.Error())
 		return
 	}
 
 	resultStringMessage := resultJsonMap["message"]
 
 	// TODO: send the message to the index.html
-	response := map[string]string{
-		"status":  "success",
-		"message": resultStringMessage,
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	SendMessage(w, r, "success", resultStringMessage)
+	// response := map[string]string{
+	// 	"status":  "success",
+	// 	"message": resultStringMessage,
+	// }
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(response)
 
 }
 

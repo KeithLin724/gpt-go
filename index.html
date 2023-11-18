@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Room</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,6 +52,32 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* 按鈕被禁用時的樣式 */
+        button:disabled,
+        button[disabled] {
+            border: 1px solid #999999;
+            background-color: #cccccc;
+            color: #666666;
+            /* 更改為您想要的顏色 */
+            cursor: not-allowed;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+
+            cursor: not-allowed;
+        }
+
+        code {
+            display: block;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', Courier, monospace;
+            color: #333;
+            overflow-x: auto;
+        }
     </style>
 </head>
 
@@ -59,58 +86,80 @@
         <div id="messages"></div>
         <div id="input-container">
             <input type="text" id="input" placeholder="Type your message">
-            <button id="send-button" onclick="sendMessage()">Send</button>
+            <button id="send-button">Send</button>
         </div>
     </div>
 
     <script>
-        function makeRequestOptions(sendData) {
-            var requestOptions = {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(sendData),
-            };
+        document.addEventListener("DOMContentLoaded", () => {
+            function makeRequestOptions(sendData) {
+                var requestOptions = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(sendData),
+                };
 
-            return requestOptions;
-        }
-
-        const messagesDiv = document.getElementById("messages");
-        const input = document.getElementById("input");
-
-        function sendMessage() {
-            const message = input.value.trim();
-            if (message !== "") {
-                appendMessage(`You: ${message}`, true);
-                input.value = "";
-
-                var sendData = {
-                    prompt: message
-                }
-
-                fetch("/send", makeRequestOptions(sendData)).then((response) => {
-                    response.json().then((recvData) => {
-                        appendMessage(`GPT : ${recvData["message"]}`, false)
-                    })
-                }).catch((error) => {
-                    console.error("Error:", error);
-                });
+                return requestOptions;
             }
-        }
 
-        function appendMessage(message, isUser) {
-            const messageDiv = document.createElement("div");
-            messageDiv.className = isUser ? "user-message" : "other-message";
-            messageDiv.textContent = message;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+            const messagesDiv = document.getElementById("messages");
+            const input = document.getElementById("input");
+            const sendMessageButton = document.getElementById("send-button");
+            // const inputField = document.getElementById("input");
 
-        // Simulate receiving messages
-        setTimeout(() => {
-            appendMessage("Hello!, Welcome to our GPT-Server", false);
-        }, 1000);
+            input.addEventListener("input", () => {
+                var inputValue = input.value;
+
+                sendMessageButton.disabled = inputValue === '';
+
+
+            });
+
+            sendMessageButton.addEventListener("click", () => {
+                sendMessage();
+            });
+
+            function sendMessage() {
+                const message = input.value.trim();
+                if (message !== "") {
+                    appendMessage(`You: ${message}`, true);
+                    input.value = "";
+
+                    var sendData = {
+                        prompt: message
+                    }
+
+                    fetch("/send", makeRequestOptions(sendData)).then((response) => {
+                        response.json().then((recvData) => {
+                            //console.log(`GPT : ${recvData["message"]}`)\
+                            var state = (recvData["state"] === "success" ? "GPT :" : "Error ,")
+                            const htmlMarkdown = marked.parse(`${state} ${recvData["message"]}`)
+                            console.log(htmlMarkdown)
+                            appendMessage(htmlMarkdown, false)
+                        })
+                    }).catch((error) => {
+                        console.error("Error:", error);
+                    });
+                }
+            }
+            function appendMessage(message, isUser) {
+                const messageDiv = document.createElement("div");
+                messageDiv.className = isUser ? "user-message" : "other-message";
+                // messageDiv.textContent = message;
+                messageDiv.innerHTML = message
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            // Simulate receiving messages
+            setTimeout(() => {
+                appendMessage("<p>Hello!, Welcome to our GPT-Server</p>", false);
+            }, 1000);
+        });
+
+
     </script>
 </body>
 
