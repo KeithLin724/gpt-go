@@ -133,8 +133,9 @@
 
                     fetch("/send", makeRequestOptions(sendData)).then((response) => {
                         response.json().then((recvData) => {
-                            //console.log(`GPT : ${recvData["message"]}`)
-                            const htmlMarkdown = marked.parse(`GPT : ${recvData["message"]}`)
+                            //console.log(`GPT : ${recvData["message"]}`)\
+                            var state = (recvData["state"] === "success" ? "GPT :" : "Error ,")
+                            const htmlMarkdown = marked.parse(`${state} ${recvData["message"]}`)
                             console.log(htmlMarkdown)
                             appendMessage(htmlMarkdown, false)
                         })
