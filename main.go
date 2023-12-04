@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -53,18 +55,95 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 	return res, err
 }
 
+type FetchResult struct {
+	URL     string
+	State   string
+	Connect bool
+
+	mx sync.Mutex
+}
+
+var globalResultChan = FetchResult{}
+
+func fetchHTTP(url string) {
+	resp, err := http.Get(url)
+	state := "Success"
+	connect := true
+
+	if err != nil {
+		state = fmt.Sprintf("Error: %s", err)
+		connect = false
+	}
+
+	globalResultChan.mx.Lock()
+
+	globalResultChan.URL = url
+	globalResultChan.State = state
+	globalResultChan.Connect = connect
+
+	globalResultChan.mx.Unlock()
+
+	if connect {
+		defer resp.Body.Close()
+	}
+}
+
 func ChatPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./index.html")
+	// url := os.Getenv("SERVER_URL")
+	// resultChan := make(chan FetchResult)
+	// fmt.Println(url)
+	// go func() {
+	// 	for {
+	// 		// fmt.Println("Hello")
+	// 		fetchHTTP(url, resultChan)
+	// 		time.Sleep(10 * time.Second)
+	// 	}
+	// }()
+
+	// go func() {
+	// 	for {
+	// 		result := <-resultChan
+	// 		fmt.Printf("%s\n", result.State)
+	// 		if result.Connect {
+	// 			http.ServeFile(w, r, "./index.html")
+	// 		} else {
+	// 			http.ServeFile(w, r, "./error.html")
+	// 		}
+	// 	}
+	// }()
+	// go func() {
+	// 	for {
+	// 		fmt.Println("hello")
+	// 		time.Sleep(2 * time.Second)
+	// 	}
+	// }()
+
+	globalResultChan.mx.Lock()
+	connect := globalResultChan.Connect
+	globalResultChan.mx.Unlock()
+
+	if connect {
+
+		http.ServeFile(w, r, "./index.html")
+	} else {
+		http.ServeFile(w, r, "./error.html")
+
+	}
+
+	fmt.Println("hello")
+
 }
 
 type RequestBody struct {
 	Prompt string `json:"prompt"`
 }
 
+// for get the server state
+
 func SendMessage(w http.ResponseWriter, r *http.Request, state, message string) {
 	// TODO: send the error message
 	response := map[string]string{
-		"status":  "fail",
+		"status":  state,
 		"message": message,
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -147,5 +226,30 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", ChatPage)
 	http.HandleFunc("/send", SendApi)
+
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	url := os.Getenv("SERVER_URL")
+	fmt.Println(url)
+
+	go func() {
+		for {
+			// invFunc(testCheck)
+
+			fetchHTTP(url)
+
+			globalResultChan.mx.Lock()
+			fmt.Println(globalResultChan.State)
+			globalResultChan.mx.Unlock()
+			time.Sleep(10 * time.Second)
+
+		}
+
+	}()
+
 	log.Fatal(http.ListenAndServe(":8085", nil))
 }
