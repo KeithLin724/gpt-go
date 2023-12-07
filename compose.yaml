@@ -16,7 +16,7 @@ services:
       - 8085:8085
 
     environment:
-      - DOCKER_MODE=${DOCKER_MODE}
+      - DOCKER_MODE=true
       - SERVER_API_URL=${SERVER_API_URL}
       - SERVER_URL=${SERVER_URL}
 
