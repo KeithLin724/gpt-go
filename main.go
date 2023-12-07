@@ -36,12 +36,6 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 
 	defer resp.Body.Close()
 
-	// fmt.Println("Response Status:", resp.Status)
-
-	// Read and print the response body
-	// buf := new(bytes.Buffer)
-	// buf.ReadFrom(resp.Body)
-	// fmt.Println("Response Body:", buf.String())
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading the response:", err)
@@ -61,9 +55,9 @@ func ChatPage(w http.ResponseWriter, r *http.Request) {
 
 	if connect {
 
-		http.ServeFile(w, r, "./index.html")
+		http.ServeFile(w, r, "./template/index.html")
 	} else {
-		http.ServeFile(w, r, "./error.html")
+		http.ServeFile(w, r, "./template/error.html")
 
 	}
 
