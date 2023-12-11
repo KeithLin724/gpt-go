@@ -87,7 +87,6 @@ func (ptr *FetchResult) RunFetchServer(sec int64) {
 	go func() {
 		for {
 			ptr.FetchHTTP(log)
-
 			time.Sleep(time.Duration(sec) * time.Second)
 		}
 	}()
