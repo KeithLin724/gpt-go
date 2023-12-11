@@ -84,7 +84,10 @@ func (ptr *FetchResult) RunFetchServer(sec int64) {
 	go func() {
 		for {
 			ptr.FetchHTTP()
-			fmt.Println(ptr.GetState())
+
+			str := time.Now().Format("2006-01-02 15:04:05")
+
+			fmt.Printf("\r" + str + " " + ptr.GetState())
 
 			time.Sleep(time.Duration(sec) * time.Second)
 		}
