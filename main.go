@@ -64,9 +64,6 @@ func ChatPage(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	//fmt.Println("hello")
-	globalLog.Info("hello")
-
 }
 
 type RequestBody struct {
