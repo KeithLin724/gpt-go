@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -20,7 +19,8 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 	request, err := http.NewRequest("POST", totalPathUrl, bytes.NewBuffer(bytesRes))
 
 	if err != nil {
-		fmt.Println("Error creating the request:", err)
+		//fmt.Println("Error creating the request:", err)
+		globalLog.Error("Error creating the request:" + err.Error())
 		return res, err
 	}
 
@@ -30,7 +30,8 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 	client := &http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Println("Error sending the request:", err)
+		//fmt.Println("Error sending the request:", err)
+		globalLog.Error("Error sending the request:" + err.Error())
 		return res, err
 	}
 
@@ -38,7 +39,8 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading the response:", err)
+		//fmt.Println("Error reading the response:", err)
+		globalLog.Error("Error reading the response:" + err.Error())
 		return res, err
 	}
 	res = body
@@ -48,6 +50,7 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 
 var globalCheckServerResult = &pkg.FetchResult{}
 var globalEnvSetUp = pkg.EnvSetUp{}
+var globalLog = pkg.NewLog()
 
 func ChatPage(w http.ResponseWriter, r *http.Request) {
 
@@ -61,7 +64,8 @@ func ChatPage(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	fmt.Println("hello")
+	//fmt.Println("hello")
+	globalLog.Info("hello")
 
 }
 
@@ -106,7 +110,8 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: get the request for the ./index.html and display
-	fmt.Printf("Received Prompt: %s\n", requestBody.Prompt)
+	//fmt.Printf("Received Prompt: %s\n", requestBody.Prompt)
+	globalLog.Info("Received Prompt: " + requestBody.Prompt)
 
 	//TODO: send the request to the sever get gpt request
 	jsonInput := map[string]string{
@@ -120,7 +125,8 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		fmt.Println("Error reading the response:", err)
+		//fmt.Println("Error reading the response:", err)
+		globalLog.Error("Error reading the response:" + err.Error())
 		SendMessage(w, r, "fail", err.Error())
 		return
 	}
@@ -131,7 +137,8 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(res, &resultJsonMap)
 
 	if err != nil {
-		fmt.Println("Error reading the response:", err)
+		//fmt.Println("Error reading the response:", err)
+		globalLog.Error("Error reading the response:" + err.Error())
 		SendMessage(w, r, "fail", err.Error())
 		return
 	}
@@ -149,13 +156,15 @@ func main() {
 	err := globalEnvSetUp.Init()
 
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
+		globalLog.Error(err.Error())
 		return
 	}
 
 	url := globalEnvSetUp.ServerURL
 
-	fmt.Println(url)
+	//fmt.Println(url)
+	globalLog.Infof("Login", "Server URL", url)
 
 	globalCheckServerResult.SetURL(url)
 	globalCheckServerResult.RunFetchServer(10)

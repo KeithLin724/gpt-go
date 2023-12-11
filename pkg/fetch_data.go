@@ -61,7 +61,7 @@ func (ptr *FetchResult) GetConnect() (res bool) {
 
 // The `FetchHTTP` function is a method of the `FetchResult` struct. It is responsible for fetching the
 // HTTP response from the specified URL and updating the state of the `FetchResult` instance.
-func (ptr *FetchResult) FetchHTTP() {
+func (ptr *FetchResult) FetchHTTP(log *Log) {
 	url, state, connect := ptr.URL, "Success", true
 
 	resp, err := http.Get(url)
@@ -69,11 +69,13 @@ func (ptr *FetchResult) FetchHTTP() {
 	if err != nil {
 		state = fmt.Sprintf("Error: %s", err)
 		connect = false
+		log.Error(state)
 	}
 
 	ptr.SetData(url, state, connect)
 
 	if connect {
+		log.Info("Success")
 		defer resp.Body.Close()
 	}
 }
@@ -81,13 +83,10 @@ func (ptr *FetchResult) FetchHTTP() {
 // The `RunFetchServer` function is a method of the `FetchResult` struct. It starts a new goroutine
 // that calls the `FetchHTTP` method of the `FetchResult` instance.
 func (ptr *FetchResult) RunFetchServer(sec int64) {
+	log := NewLog()
 	go func() {
 		for {
-			ptr.FetchHTTP()
-
-			str := time.Now().Format("2006-01-02 15:04:05")
-
-			fmt.Printf("\r" + str + " " + ptr.GetState())
+			ptr.FetchHTTP(log)
 
 			time.Sleep(time.Duration(sec) * time.Second)
 		}
