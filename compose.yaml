@@ -8,6 +8,11 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
+  api:
+    build: ./api
+    ports:
+      - 1337:1337
+  
   server:
     build:
       context: .
