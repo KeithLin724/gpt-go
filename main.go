@@ -51,6 +51,7 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 var globalCheckServerResult = &pkg.FetchResult{}
 var globalEnvSetUp = pkg.EnvSetUp{}
 var globalLog = pkg.NewLog()
+var openaiClient = pkg.NewOpenaiClientWithIp("", "http://localhost:1337/v1")
 
 func ChatPage(w http.ResponseWriter, r *http.Request) {
 
@@ -93,7 +94,7 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Get Chat Url
-	chapAPIUrl := globalEnvSetUp.ServerApiURL
+	// chapAPIUrl := globalEnvSetUp.ServerApiURL
 
 	// Decode the JSON request body into the RequestBody struct
 	var requestBody RequestBody
@@ -111,15 +112,17 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	globalLog.Info("Received Prompt: " + requestBody.Prompt)
 
 	//TODO: send the request to the sever get gpt request
-	jsonInput := map[string]string{
-		"prompt": requestBody.Prompt,
-	}
+	// jsonInput := map[string]string{
+	// 	"prompt": requestBody.Prompt,
+	// }
 
-	res, err := PostRequest2(
-		chapAPIUrl,
-		"application/json",
-		jsonInput,
-	)
+	// res, err := PostRequest2(
+	// 	chapAPIUrl,
+	// 	"application/json",
+	// 	jsonInput,
+	// )
+
+	resultStringMessage, err := openaiClient.RequestOpenAi(requestBody.Prompt)
 
 	if err != nil {
 		//fmt.Println("Error reading the response:", err)
@@ -129,18 +132,18 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO: decode the request
-	var resultJsonMap map[string]string
+	// var resultJsonMap map[string]string
 
-	err = json.Unmarshal(res, &resultJsonMap)
+	// err = json.Unmarshal(res, &resultJsonMap)
 
-	if err != nil {
-		//fmt.Println("Error reading the response:", err)
-		globalLog.Error("Error reading the response:" + err.Error())
-		SendMessage(w, r, "fail", err.Error())
-		return
-	}
+	// if err != nil {
+	// 	//fmt.Println("Error reading the response:", err)
+	// 	globalLog.Error("Error reading the response:" + err.Error())
+	// 	SendMessage(w, r, "fail", err.Error())
+	// 	return
+	// }
 
-	resultStringMessage := resultJsonMap["message"]
+	// resultStringMessage := resultJsonMap["message"]
 
 	// TODO: send the message to the index.html
 	SendMessage(w, r, "success", resultStringMessage)
