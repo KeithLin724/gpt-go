@@ -51,7 +51,7 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 var globalCheckServerResult = &pkg.FetchResult{}
 var globalEnvSetUp = pkg.EnvSetUp{}
 var globalLog = pkg.NewLog()
-var openaiClient = pkg.NewOpenaiClientWithIp("", "http://localhost:1337/v1")
+var openaiClient = pkg.NewOpenaiClientWithIp("", "http://api:1337/v1")
 
 func ChatPage(w http.ResponseWriter, r *http.Request) {
 
@@ -59,9 +59,9 @@ func ChatPage(w http.ResponseWriter, r *http.Request) {
 
 	if connect {
 
-		http.ServeFile(w, r, "./template/index.html")
+		http.ServeFile(w, r, "template/index.html")
 	} else {
-		http.ServeFile(w, r, "./template/error.html")
+		http.ServeFile(w, r, "template/error.html")
 
 	}
 
