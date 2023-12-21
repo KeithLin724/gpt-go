@@ -19,7 +19,8 @@ services:
       target: final
     ports:
       - 8085:8085
-
+    depends_on:
+      - api
     environment:
       - DOCKER_MODE=true
       # - SERVER_API_URL=${SERVER_API_URL}
