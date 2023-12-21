@@ -22,8 +22,8 @@ services:
 
     environment:
       - DOCKER_MODE=true
-      - SERVER_API_URL=${SERVER_API_URL}
-      - SERVER_URL=${SERVER_URL}
+      # - SERVER_API_URL=${SERVER_API_URL}
+      # - SERVER_URL=${SERVER_URL}
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

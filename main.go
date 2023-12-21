@@ -49,7 +49,8 @@ func PostRequest2(path string, contentType string, sendBody map[string]string) (
 }
 
 var globalCheckServerResult = &pkg.FetchResult{}
-var globalEnvSetUp = pkg.EnvSetUp{}
+
+// var globalEnvSetUp = pkg.EnvSetUp{}
 var globalLog = pkg.NewLog()
 var openaiClient = pkg.NewOpenaiClientWithIp("", "http://api:1337/v1")
 
@@ -57,6 +58,7 @@ func ChatPage(w http.ResponseWriter, r *http.Request) {
 
 	connect := globalCheckServerResult.GetConnect()
 
+	// http.ServeFile(w, r, "template/index.html")
 	if connect {
 
 		http.ServeFile(w, r, "template/index.html")
@@ -108,20 +110,9 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: get the request for the ./index.html and display
-	//fmt.Printf("Received Prompt: %s\n", requestBody.Prompt)
 	globalLog.Info("Received Prompt: " + requestBody.Prompt)
 
 	//TODO: send the request to the sever get gpt request
-	// jsonInput := map[string]string{
-	// 	"prompt": requestBody.Prompt,
-	// }
-
-	// res, err := PostRequest2(
-	// 	chapAPIUrl,
-	// 	"application/json",
-	// 	jsonInput,
-	// )
-
 	resultStringMessage, err := openaiClient.RequestOpenAi(requestBody.Prompt)
 
 	if err != nil {
@@ -131,20 +122,6 @@ func SendApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO: decode the request
-	// var resultJsonMap map[string]string
-
-	// err = json.Unmarshal(res, &resultJsonMap)
-
-	// if err != nil {
-	// 	//fmt.Println("Error reading the response:", err)
-	// 	globalLog.Error("Error reading the response:" + err.Error())
-	// 	SendMessage(w, r, "fail", err.Error())
-	// 	return
-	// }
-
-	// resultStringMessage := resultJsonMap["message"]
-
 	// TODO: send the message to the index.html
 	SendMessage(w, r, "success", resultStringMessage)
 }
@@ -153,15 +130,16 @@ func main() {
 	http.HandleFunc("/", ChatPage)
 	http.HandleFunc("/send", SendApi)
 
-	err := globalEnvSetUp.Init()
+	// err := globalEnvSetUp.Init()
 
-	if err != nil {
-		//fmt.Println(err)
-		globalLog.Error(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	//fmt.Println(err)
+	// 	globalLog.Error(err.Error())
+	// 	return
+	// }
 
-	url := globalEnvSetUp.ServerURL
+	// url := globalEnvSetUp.ServerURL
+	url := "http://api:1337/v1"
 
 	//fmt.Println(url)
 	globalLog.Infof("Login", "Server URL", url)
