@@ -186,13 +186,6 @@ class Api:
         self.engine = engine
         self.debug = debug
         self.sentry = sentry
-        # self.list_ignored_providers = list_ignored_providers
-        # self.list_ignored_providers = [
-        #     g4f.Provider.Raycast,
-        #     g4f.Provider.Phind,
-        #     g4f.Provider.Bing,
-        #     # g4f.Provider.Liaobots,
-        # ]
 
         self.app = FastAPI()
         nest_asyncio.apply()
