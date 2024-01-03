@@ -275,11 +275,7 @@ class Api:
             model = item_data.get("model")
             stream = True if item_data.get("stream") == "True" else False
             messages = item_data.get("messages")
-            conversation = (
-                item_data.get("conversation")
-                if item_data.get("conversation") != None
-                else None
-            )
+            conversation = item_data.get("conversation", None)
 
             provider = None
 
