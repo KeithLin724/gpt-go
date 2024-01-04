@@ -21,6 +21,8 @@ func NewOpenaiClientWithIp(token, ip string) *OpenaiClient {
 	return &OpenaiClient{openai.NewClientWithConfig(config)}
 }
 
+// The `RequestOpenAi` function is a method of the `OpenaiClient` struct. It takes a `message` string
+// as input and returns a string and an error.
 func (openaiClient *OpenaiClient) RequestOpenAi(message string) (string, error) {
 	resp, err := openaiClient.client.CreateChatCompletion(
 		context.Background(),
